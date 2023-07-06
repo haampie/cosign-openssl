@@ -19,7 +19,7 @@ cosign.key: cosign
 
 cosign.decrypted.key: cosign.key password-decrypt-cosign-key.go
 	# Password decrypt the private key
-	go run password-decrypt-cosign-key.go $< $(PASSWORD) > $@
+	go run password-decrypt-cosign-key.go $< "$(PASSWORD)" > $@
 
 openssl.key: cosign.decrypted.key
 	# Show the key information
