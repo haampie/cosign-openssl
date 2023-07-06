@@ -4,9 +4,9 @@ GO = go
 PASSWORD = secret!
 OPENSSL = openssl
 
-.PHONY: all distclean clean verify
+.PHONY: all distclean clean show verify
 
-all: verify
+all: show verify
 
 cosign:
 	# Install cosign (yes, I'm not validating their binary)
@@ -22,8 +22,6 @@ cosign.decrypted.key: cosign.key password-decrypt-cosign-key.go
 	go run password-decrypt-cosign-key.go $< "$(PASSWORD)" > $@
 
 openssl.key: cosign.decrypted.key
-	# Show the key information
-	$(OPENSSL) pkey -in $< -text -noout
 	# Password protect the key again with openssl
 	$(OPENSSL) pkcs8 -in $< -topk8 -scrypt -passout "pass:$(PASSWORD)" -out $@
 
@@ -44,6 +42,10 @@ verify: example.sig openssl.pub cosign.pub
 	$(OPENSSL) dgst -verify openssl.pub -signature example.sig example
 	# Verify the dummy file using the public key that cosign generated (should be the same)
 	$(OPENSSL) dgst -verify cosign.pub -signature example.sig example
+
+show: cosign.decrypted.key
+	# Show the key information
+	$(OPENSSL) pkey -in $< -text -noout
 
 clean:
 	rm -f cosign.key cosign.pub cosign.decrypted.key openssl.key openssl.pub example example.sig
