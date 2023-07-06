@@ -13,12 +13,12 @@ cosign:
 	$(CURL) -LfsS -o $@ https://github.com/sigstore/cosign/releases/download/v2.1.1/cosign-linux-amd64
 	chmod +x $@
 
-# Generate a key
 cosign.key: cosign
+	# Generate a key
 	COSIGN_PASSWORD="$(PASSWORD)" ./cosign generate-key-pair
 
-# Password decrypt the private key
 cosign.decrypted.key: cosign.key password-decrypt-cosign-key.go
+	# Password decrypt the private key
 	go run password-decrypt-cosign-key.go $< $(PASSWORD) > $@
 
 openssl.key: cosign.decrypted.key
